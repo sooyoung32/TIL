@@ -1,9 +1,7 @@
-## Test
+## test
 
-```java
-	@RequestMapping("/test")
-	public String test() {
-    	System.out.println("Hello world")
-		return "test";
-	}
-```
+'''javascript
+function test () {
+  alert("test");
+}
+'''

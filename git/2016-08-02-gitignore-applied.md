@@ -1,3 +1,14 @@
+---
+layout: post
+title:  "gitignore 적용 시키기"
+date:   2016-08-01
+author: Sooyoung
+categories: dev
+tags: jekyll git
+cover:  "/assets/img/git.png"
+---
+
+
 ## gitignore 적용 시키기
 gitignore 가 적용되지 않고 서버에 올라갔을때 gitignore를 적용시켜 다시 올리기!!
 
