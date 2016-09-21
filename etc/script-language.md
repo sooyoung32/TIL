@@ -8,7 +8,7 @@
 
 대표적인 스크립트 언어는 JavaScript, ActionScript, Perl, PHP, Python, Ruby..
 
-### 컴파일 언어
+### 컴파일 언어 동작방식
 1. 프로그램 언어로 코드 작성
 2. 컴파일러를 통해 기계어로 번역(바이너리파일이 됨) 후 실행파일
 3. 실행
@@ -17,8 +17,8 @@
 
 * 일반적으로 컴파일된 프로그램은 인터프리터를 이용해 실행시키는 것보다 빠르다.
 * 단점은 컴파일 하는데 시간이 걸릴수 있다.
-* 
-### 스크립트 언어
+
+### 스크립트 언어 동작방식
 1. 프로그램 언어로 작성
 2. (인터프리터에 의해 기계어로 번역과 동시에 실행파일 X) 실행
 
@@ -37,8 +37,10 @@
 * 단일 응용프로그램으로 사용되기 보다는 응용프로그램 내에서 특정 역할을 수행하는 경우가 많다.
 
 
+![컴파일러 vs 인터프리터](http://1.bp.blogspot.com/-EAW06C1nJpI/Ux63vTnHSMI/AAAAAAAAAJ4/YFVybmZZq8Q/s1600/3.jpg) 
+
 * *참고*
   * [나무위키](https://namu.wiki/w/%EC%8A%A4%ED%81%AC%EB%A6%BD%ED%8A%B8%20%EC%96%B8%EC%96%B4)
 
-* ![컴파일러 vs 인터프리터](http://1.bp.blogspot.com/-EAW06C1nJpI/Ux63vTnHSMI/AAAAAAAAAJ4/YFVybmZZq8Q/s1600/3.jpg) 
+
   
