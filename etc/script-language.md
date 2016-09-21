@@ -17,7 +17,7 @@
 * 단일 응용프로그램으로 사용되기 보다는 응용프로그램 내에서 특정 역할을 수행하는 경우가 많다.
 
 
-* 참고 [남나뭉나무윜나무위키 ](https://namu.wiki/w/%EC%8A%A4%ED%81%AC%EB%A6%BD%ED%8A%B8%20%EC%96%B8%EC%96%B4)
+* 참고 [나무위키 ](https://namu.wiki/w/%EC%8A%A4%ED%81%AC%EB%A6%BD%ED%8A%B8%20%EC%96%B8%EC%96%B4)
 
 ### Compiler vs Interprater
 #### Compiler
