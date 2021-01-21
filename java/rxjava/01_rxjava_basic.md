@@ -75,3 +75,189 @@
 
 - 리액티브프로그래밍에서 시간 경과에 따라 데이터가 전달되고 변화되는지를 표현
 - 주로 Flowable Observable에서 메서드를 호출할때, 시간의 경과에 따라 데이터가 어떻게 변화하는지를 설명
+
+
+## 예제
+
+### Flowable
+
+```java
+## 예제
+
+```java
+package example.rxjava;
+
+import io.reactivex.BackpressureStrategy;
+import io.reactivex.Flowable;
+import io.reactivex.FlowableEmitter;
+import io.reactivex.FlowableOnSubscribe;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.schedulers.Schedulers;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
+public class FlowableTest {
+  public static void main(String[] args) throws InterruptedException {
+
+    Flowable<String> flowable = Flowable.create(new FlowableOnSubscribe<String>() { // 통지 시작, FlowableEmitter는 통지 메서드의 내부에서 구독 해지 여부 확인. 
+      @Override
+      public void subscribe(@NonNull FlowableEmitter<String> emitter) throws Exception { // 에러를 던지는 것은, 처리중에 예외가 발생하면,  Subscriber에 에러를 통지하기 위해 구현됨.
+        String[] data = {"Hello, World", "안녕 rxjava"};
+        for (String item : data) {
+
+          if (emitter.isCancelled()) { // 구독 해지시 통지 중단
+            return;
+          }
+          emitter.onNext(item); // 데이터를 전달해 Subscriber에게 통지
+        }
+        emitter.onComplete(); // 데이터 완료 통지
+      }
+    }, BackpressureStrategy.BUFFER); //초과한 데이터는 버퍼링
+
+    flowable.observeOn(Schedulers.computation())
+            .subscribe(new Subscriber<>() {
+              private Subscription subscription;
+
+              @Override
+              public void onSubscribe(Subscription s) { //Flowable이 구독되고 데이터 통지가 준비됐을때 호출하느 ㄴ메서드. 
+                this.subscription = s;
+                this.subscription.request(1L);
+              }
+
+              @Override
+              public void onNext(String s) { // 통지한 데이터를 받음 
+                String thread = Thread.currentThread().getName();
+                System.out.println("thread = " + thread +"data  = " + s);
+                this.subscription.request(1L);
+              }
+
+              @Override
+              public void onError(Throwable t) { //에러가 발생하거나 에러 통지를 할때 실행되는 메서드 
+                t.printStackTrace();
+              }
+
+              @Override
+              public void onComplete() { // 통지를 끝내고 처리가 완료됐을때 실행되는 메서드 
+                String thread = Thread.currentThread().getName();
+                System.out.println("thread = " + thread + " 완료");
+              }
+            });
+
+    Thread.sleep(1000L);
+  }
+
+}
+
+```
+```
+
+- Subscriber는 자신이 처리할 수 있는 속도로 데이터를 받게 Flowable이 통지하는 데이터 개수를 제한 할 수 있음 → 배압!
+- 다만 요청 데이터를 처리하는 도중에 문제가 발생하면 데이터 개수를 요청하지 못하는 문제 발생 → Subscriber가 데이터를 받을 수 있는 상황이라도, Flowable 이 데이터 요청을 대기하는 상태가 지속되 처리가 멈출 가능성도 존재
+    - 데이터 개수가 많지 않으면 통지 데이터 개수를 제한할 필요가 없을때도 많음.
+    - 이때는 onSubscribe.request 메서드에 Long.MAX_VALUE를 설정하면 생산자는 데이터 개수의 제한 없이 전송 가능
+
+## Observable
+
+```java
+package example.rxjava;
+
+import io.reactivex.*;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+
+public class ObservableTest {
+    public static void main(String[] args) throws InterruptedException {
+
+        Observable<String> observable = Observable.create(new ObservableOnSubscribe<String>() {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<String> emitter) throws Exception {
+                String[] data = {"test", "test2"};
+                for (String item :  data) {
+                    if (emitter.isDisposed()) {  //disposed 됨.
+                        return;
+                    }
+                    emitter.onNext(item);
+                }
+                emitter.onComplete();
+            }
+        }); // 배압이 없음
+
+        observable.observeOn(Schedulers.computation())
+                .subscribe(new Observer<String>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                        //do nothing
+                    }
+
+                    @Override
+                    public void onNext(@NonNull String s) {
+                        System.out.println("thread = "+ Thread.currentThread().getName() + " data = "+ s);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        System.out.println("thread = "+ Thread.currentThread().getName() + " 완료 ");
+                    }
+                });
+
+        Thread.sleep(1000L);
+    }
+}
+```
+
+### Flowable vs Observable
+
+Flowable
+
+- 대량 데이터 처리 시 사용
+- 네트워크 통신이나 데이터베이스의 I/O 처리
+
+Observable
+
+- GUI 이벤트
+- 소량 데이터시 사용
+- 데이터 처리가 기본으로 동기방식이며 자바 표준의 Stream을 대신하여 사용할때
+
+## RxJava의 전체구성
+
+- 소비자 (Subscriber, Observer)가 생산자 (Flowable, Observable)을 구독하는 형태, 생산자와 소비자 사이에서 공유되는 Subsciption과 Disposable
+- 생산자와 소비자의 관계는 Reactive Streams 사양을 지원하는 Flowable Subscriber 와,  지원하지 않는 Observable, Observer 로 구성
+- Flowable은 배압 존재, Observable은 배압 없음
+
+### 통지시 규칙
+
+- null 은 안됨
+- 데이터 통지는 해도 되고 안해도 된다.
+- 처리를 끝낼때는 완료나 에러 통지를 해야한다며 둘 다 하지 않는다
+- 통지할 때는 1건씩 순차적으로 통지하며 동시에 하지 않는다.
+- 여러스레드에서 데이터 생성하고 통지할때는 동기화를 한 뒤에 데이터를 통지 메서드에 구현
+  - 스레드를 관리해야함으로 1개의 스레드에서 처리하는 생산자를 여러개 준비하고 이들을 하나로 결합하는 메서드로 처리하는것이 안전
+
+- Subscriber/Observer
+  - 통지데이터를 전달 받아 데이터를 처리하는 인터페이스
+- Subsciption
+  - 통지 데이터 개수를 요청하는 request와 처리 도중에 구독 해지하는 cancel 메서드 포함
+- Disposable
+  - 구독을 해지하는 메서드를 포함한 인터페이스
+- FlowableProcessor /  Subject
+  - 생산자와 소비자의 기능이 모두 있는 인터페이스
+- DisposableSubscriber or DisposableObserver
+  - 외부에서 비동기로 구독해지 메서드를 호출해도 안전하게 구독해지 하게 해줌
+- ResourceSubscriber or ResourceObserver
+  - 외부에서 비동기로 구독해지 메서드를 호출해도 안전하게 구독해지 하게 해줌
+- Subscribe or subscribeWith
+  - 소비자가 생상자를 구독하는 메서드 생상자가 데이터를 통지할 소비자를 등록
+- CompositeDisposable
+  - 가지고 있는 모든 disposable 을 호출 할 수 있는 클래스
+
+### Single , Maybe, Completable
+
+- Single : 데이터를 1건만 통지하거나 에러를 통지하는 클래스
+- Maybe : 데이터를 1건만 통지하거나 1건도 통지하지 않고 완료를 통지하거나 에러를 통지
+- Completable : 데이터를 1건도 통지하지 않고 완료나 에러를 통지
