@@ -8,7 +8,7 @@ import com.example.examplespringconcept.member.MemberServiceImpl;
 public class MemberApp {
 
     public static void main(String[] args) {
-        MemberService memberService = new MemberServiceImpl(); //DIP 위반
+        MemberService memberService = new MemberServiceImpl(memberRepository); //DIP 위반
         Member member = new Member(1L, "memberA", Grade.VIP);
         memberService.join(member);
 

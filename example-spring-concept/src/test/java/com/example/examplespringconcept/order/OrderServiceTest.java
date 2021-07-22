@@ -7,18 +7,16 @@ import com.example.examplespringconcept.member.MemberServiceImpl;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class OrderServiceTest {
 
-    MemberService memberService = new MemberServiceImpl();
-    OrderService orderService = new OrderServiceImpl();
+    MemberService memberService = new MemberServiceImpl(memberRepository);
+    OrderService orderService = new OrderServiceImpl(memberRepository, discountPolicy);
 
     @Test
     void createOrder() {
         //given
-        MemberService memberService = new MemberServiceImpl();
-        OrderService orderService = new OrderServiceImpl();
+        MemberService memberService = new MemberServiceImpl(memberRepository);
+        OrderService orderService = new OrderServiceImpl(memberRepository, discountPolicy);
 
         //when
         Long memberId = 1L;
